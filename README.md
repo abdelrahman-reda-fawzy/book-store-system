@@ -1,9 +1,3 @@
-# 📚 Online Bookstore Database System
-
-[cite_start]This project contains the database schema, triggers, and seed data for the Fall 2025 Database Systems project[cite: 5, 6].
-
-We are using **Docker** to ensure everyone on the team runs the exact same version of MySQL with the exact same test data.
-
 ## 🚀 Prerequisites
 
 You need **Docker** installed on your machine.
@@ -46,9 +40,9 @@ Connect to the database using any tool (DBeaver, MySQL Workbench, IntelliJ IDEA,
 
 * `docker-compose.yml`: Configures the MySQL server.
 * `sql/`: Contains our migration scripts.
-    * [cite_start]`V1__Create_Schema.sql`: Creates tables (Books, Customers, Orders, etc.)
-    * [cite_start]`V2__Add_Triggers.sql`: Adds logic for negative stock prevention and auto-ordering
-    * [cite_start]`V3__Seed_Data.sql`: Inserts sample data (Alice, Bob, clean code book, etc.)
+    * `V1__Create_Schema.sql`: Creates tables (Books, Customers, Orders, etc.)
+    * `V2__Add_Triggers.sql`: Adds logic for negative stock prevention and auto-ordering
+    * `V3__Seed_Data.sql`: Inserts sample data (Alice, Bob, clean code book, etc.)
 
 ---
 
