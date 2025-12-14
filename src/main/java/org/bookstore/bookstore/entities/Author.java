@@ -4,21 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "publishers")
+@Table(name = "authors")
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Publisher {
+public class Author {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer publisherID;
+    private Integer authorID;
 
     @Column(nullable = false)
     private String name;
-
-    @Column(columnDefinition = "TEXT")
-    private String address;
-
-    private String phone;
 }
