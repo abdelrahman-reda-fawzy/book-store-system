@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: BookStoreWebApp
-  datasource:
-    url: jdbc:mysql://localhost:3306/BOOK_STORE
-    username: root
-    password: 'MyPassword!@1814'
