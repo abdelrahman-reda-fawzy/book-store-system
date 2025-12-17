@@ -1,4 +1,4 @@
-package org.bookstore.bookstore.services;
+package org.bookstore.bookstore.services.Authintication;
 
 import lombok.AllArgsConstructor;
 import org.bookstore.bookstore.entities.EmailVerificationToken;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-public class EmailVerificationService {
+public class VerificationService {
 
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
 

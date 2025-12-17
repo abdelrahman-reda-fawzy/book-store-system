@@ -5,17 +5,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.bookstore.bookstore.dtos.*;
-import org.bookstore.bookstore.entities.RefreshToken;
-import org.bookstore.bookstore.services.AuthService;
-import org.bookstore.bookstore.services.JwtService;
-import org.bookstore.bookstore.services.RefreshTokenService;
+import org.bookstore.bookstore.dtos.auth.*;
+import org.bookstore.bookstore.services.Authintication.AuthService;
+import org.bookstore.bookstore.services.Authintication.JwtService;
+import org.bookstore.bookstore.services.Authintication.RefreshTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 @RestController
 @AllArgsConstructor
@@ -90,10 +88,22 @@ public class AuthController {
 
     }
 
-    @GetMapping("/admin/get")
-    public ResponseEntity<?> test()
+    @PostMapping("/forgotpassword")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequest request)
     {
-        return ResponseEntity.ok().body("TMAMM");
+       var resp= authService.sendForgetPasswordOtp(request.getEmail());
+        return  ResponseEntity.ok(resp);
+    }
+
+
+    @PostMapping("/checkforgotpassword")
+    public  ResponseEntity<?>checkForgotPassword(@Valid @RequestBody ForgetPasswordOtpRequest
+                                                 forgetPasswordOtpRequest)
+    {
+        authService.checkForgetPasswordOtp(forgetPasswordOtpRequest);
+
+        return ResponseEntity.ok().body("Password has changed");
+
     }
 
 

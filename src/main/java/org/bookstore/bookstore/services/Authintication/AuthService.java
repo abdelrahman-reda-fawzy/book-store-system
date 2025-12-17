@@ -1,19 +1,18 @@
-package org.bookstore.bookstore.services;
+package org.bookstore.bookstore.services.Authintication;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.bookstore.bookstore.dtos.JwtResponse;
-import org.bookstore.bookstore.dtos.LoginRequest;
-import org.bookstore.bookstore.dtos.SignUpRequest;
-import org.bookstore.bookstore.entities.EmailVerificationToken;
-import org.bookstore.bookstore.entities.Message;
-import org.bookstore.bookstore.entities.RefreshToken;
-import org.bookstore.bookstore.entities.User;
+import org.bookstore.bookstore.dtos.*;
+import org.bookstore.bookstore.dtos.auth.ForgetPasswordOtpRequest;
+import org.bookstore.bookstore.dtos.auth.ForgetPasswordResponse;
+import org.bookstore.bookstore.dtos.auth.JwtResponse;
+import org.bookstore.bookstore.dtos.auth.LoginRequest;
+import org.bookstore.bookstore.entities.*;
 import org.bookstore.bookstore.exceptions.BusinessException;
-import org.bookstore.bookstore.repositories.UserRepository;
+import org.bookstore.bookstore.services.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +23,13 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class AuthService {
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final JwtService jwtService;
     private final PasswordEncoder encoder;
-    private final EmailVerificationService emailVerificationService;
+    private final VerificationService verificationService;
     private final EmailService emailService;
+    private final ForgetPasswordService forgetPasswordService;
 
 
 
@@ -38,7 +38,7 @@ public class AuthService {
                              HttpServletResponse response)
     {
 
-        var user=userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()
+        var user=userService.findByEmail(loginRequest.getEmail()).orElseThrow(()
         -> new BusinessException("User not found"));
 
         if(!user.isEnabled() || !user.isEmailVerified())
@@ -90,7 +90,7 @@ public class AuthService {
     @Transactional
     public void signUp(SignUpRequest signUpRequest)
     {
-           Optional<User> user=userRepository.findByEmail(signUpRequest.getEmail());
+           Optional<User> user=userService.findByEmail(signUpRequest.getEmail());
            if(user.isPresent())
            {
                throw  new BusinessException("this email is already registerd ");
@@ -115,7 +115,7 @@ public class AuthService {
           newUser.setFirstName(signUpRequest.getFirstName());
           newUser.setLastName(signUpRequest.getLastName());
 
-          userRepository.save(newUser);
+          userService.save(newUser);
 
           var emailVarToken=createEmailVerificationToken(newUser);
 
@@ -135,7 +135,7 @@ public class AuthService {
     @Transactional
     public void  verifyUser(String token)
     {
-       var emailVerToken = emailVerificationService.findByToken(token).orElseThrow(()-> new RuntimeException("the token entered is wrong")
+       var emailVerToken = verificationService.findByToken(token).orElseThrow(()-> new RuntimeException("the token entered is wrong")
       );
 
       if(emailVerToken.getExpiryDate().isBefore(LocalDateTime.now()))
@@ -150,19 +150,71 @@ public class AuthService {
       user.setEmailVerified(true);
       user.setEnabled(true);
 
-      emailVerificationService.delete(emailVerToken);
+      verificationService.delete(emailVerToken);
 
     }
+
+    @Transactional
+    public ForgetPasswordResponse sendForgetPasswordOtp(String email)
+    {
+        String otp=verificationService.generate6DigitCode();
+
+        var forgetPassword= forgetPasswordService.createFromEmail(email,otp);
+
+        forgetPasswordService.save(forgetPassword);
+
+
+        emailService.sendEmail(email,new Message(otp,"Forget password otp"));
+        return new ForgetPasswordResponse(otp,email);
+    }
+
+
+
+
+    public void  checkForgetPasswordOtp(ForgetPasswordOtpRequest forgetPasswordOtpRequest)
+    {
+        var tokenEntity= forgetPasswordService.findByEmail(forgetPasswordOtpRequest.getEmail()).orElseThrow(
+                ()-> new BusinessException("no Passwoed forget used for this user")
+        );
+
+        if(tokenEntity.getExpiryDate().isBefore(LocalDateTime.now()))
+        {
+            forgetPasswordService.delete(tokenEntity);
+            throw new BusinessException("this token is expired");
+        }
+
+       if(!forgetPasswordOtpRequest.getOTP().equals(tokenEntity.getOtp())) {
+           forgetPasswordService.delete(tokenEntity);
+           throw new BusinessException("the token you entered is wrong");
+       }
+
+
+
+       var user =userService.findByEmail(forgetPasswordOtpRequest.getEmail()).orElseThrow(
+               ()-> new BusinessException("the user has not registered the system")
+       );
+
+       user.setPassword(encoder.encode(forgetPasswordOtpRequest
+               .getNewPassword()));
+
+       forgetPasswordService.delete(tokenEntity);
+
+
+
+       userService.save(user);
+    }
+
+
 
 
 
     public EmailVerificationToken createEmailVerificationToken(User user)
     {
         EmailVerificationToken emailVerificationToken=new EmailVerificationToken();
-        emailVerificationToken.setToken(emailVerificationService.generate6DigitCode());
+        emailVerificationToken.setToken(verificationService.generate6DigitCode());
         emailVerificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
         emailVerificationToken.setUser(user);
-        emailVerificationService.save(emailVerificationToken);
+        verificationService.save(emailVerificationToken);
         return  emailVerificationToken;
 
     }

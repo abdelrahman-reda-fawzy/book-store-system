@@ -12,7 +12,7 @@ import  org.bookstore.bookstore.entities.Message;
 @Service
 public class EmailService {
     private final JavaMailSender mailSender;
-
+      //note that this service needs dependencies i downloaded int th pom file
     @Async
     public void sendEmail(String to, Message message) {
         MimeMessage msg = mailSender.createMimeMessage();

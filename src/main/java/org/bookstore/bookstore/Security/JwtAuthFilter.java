@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.bookstore.bookstore.entities.User;
 import org.bookstore.bookstore.repositories.UserRepository;
-import org.bookstore.bookstore.services.JwtService;
+import org.bookstore.bookstore.services.Authintication.JwtService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;

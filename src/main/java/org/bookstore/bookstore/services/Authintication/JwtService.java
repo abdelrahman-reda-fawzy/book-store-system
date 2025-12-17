@@ -1,4 +1,4 @@
-package org.bookstore.bookstore.services;
+package org.bookstore.bookstore.services.Authintication;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.Locale;
 import java.util.function.Function;
 
 

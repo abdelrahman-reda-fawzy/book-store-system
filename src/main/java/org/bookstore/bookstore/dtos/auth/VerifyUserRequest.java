@@ -1,4 +1,4 @@
-package org.bookstore.bookstore.dtos;
+package org.bookstore.bookstore.dtos.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

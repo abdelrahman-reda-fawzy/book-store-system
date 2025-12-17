@@ -1,4 +1,4 @@
-package org.bookstore.bookstore.dtos;
+package org.bookstore.bookstore.dtos.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class LogOutRequest {
+public class JwtResponse {
 
-    private Integer userId;
+    private String accessToken;
+
 }
