@@ -15,43 +15,29 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    // i will make it out of the code and get it from the yml for security consideration
+
     private static final String SECRET_KEY =
-            "Mahmoud-Abdelrazik-Shikabala-is-the-legened-now-and-forever";
-    private static final Long expirationTime= (long) (7 * 60 * 1000);
+            "JXz2K5mJqF8cVZ+ZbZqX6eGz6wP0F0pZxJ+ZxF1cY6U=";
+
+    private static final long EXPIRATION_TIME = 2 * 60 * 1000;
 
     public String generateAccessToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(
-                        new Date(System.currentTimeMillis() + expirationTime)
-                )
-                .signWith(
-                        Keys.hmacShaKeyFor(SECRET_KEY.getBytes()),
-                        SignatureAlgorithm.HS256
-                )
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-
-
     public String extractEmail(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return extractClaim(token, Claims::getSubject);
     }
 
-
-   public boolean isTokenValid(String email,String token)
-   {
-       return (extractEmail(email).equals(token) && extractExpiration(token).after(new Date()));
-   }
-
-
+    public boolean isTokenValid(String token, String email) {
+        return extractEmail(token).equals(email)
+                && extractExpiration(token).after(new Date());
+    }
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
@@ -67,13 +53,8 @@ public class JwtService {
         return resolver.apply(claims);
     }
 
-
-
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-
-
-
 }

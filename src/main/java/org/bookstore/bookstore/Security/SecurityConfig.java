@@ -37,7 +37,8 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // Admin endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/auth/admin/**").hasRole("ADMIN")
+
 
                         // Authenticated users
                         .anyRequest().authenticated()

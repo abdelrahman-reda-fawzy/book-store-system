@@ -4,6 +4,7 @@ package org.bookstore.bookstore.services;
 import lombok.AllArgsConstructor;
 import org.bookstore.bookstore.entities.RefreshToken;
 import org.bookstore.bookstore.entities.User;
+import org.bookstore.bookstore.exceptions.BusinessException;
 import org.bookstore.bookstore.repositories.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class RefreshTokenService {
         refreshToken.setUser(user);
         refreshToken.setDeviceId(deviceId);
         refreshToken.setUserAgent(userAgent);
-        refreshToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+        refreshToken.setExpiryDate(LocalDateTime.now().plusHours(5));
 
         refreshTokenRepository.save(refreshToken);
 
@@ -35,14 +36,19 @@ public class RefreshTokenService {
     public RefreshToken isValid(String token)
     {
         var refreshToken= refreshTokenRepository.findByToken(token)
-                .orElseThrow(()->new RuntimeException("Invalid token (does not exist in db)"));
+                .orElseThrow(()->new BusinessException("Invalid token (does not exist in db)"));
+        //System.out.println("am hereee");
 
         if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            refreshTokenRepository.delete(refreshToken);
-            throw new RuntimeException("Refresh token expired");
+            throw new BusinessException("Refresh token expired");
         }
 
         return refreshToken;
+    }
+
+    public void delete(RefreshToken refreshToken)
+    {
+        refreshTokenRepository.deleteAllByUserId(refreshToken.getUser().getUserId());
     }
 
 

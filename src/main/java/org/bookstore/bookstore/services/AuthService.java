@@ -41,6 +41,11 @@ public class AuthService {
         var user=userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()
         -> new BusinessException("User not found"));
 
+        if(!user.isEnabled() || !user.isEmailVerified())
+        {
+            throw new BusinessException("the email has not been verified yet");
+        }
+
         if(!encoder.matches(loginRequest.getPassword(),user.getPassword()))
            throw  new BusinessException("Bad Credentials");
 
@@ -61,6 +66,24 @@ public class AuthService {
 
         return new JwtResponse(accessToken);
 
+
+    }
+
+    @Transactional
+    public JwtResponse refresh(
+            String refreshToken, HttpServletRequest request,HttpServletResponse response
+    ){
+        //validate if the
+       RefreshToken rt=refreshTokenService.isValid(refreshToken);
+
+       String newAccessToken= jwtService.generateAccessToken(rt.getUser().getEmail());
+       RefreshToken newRefreshToken=refreshTokenService.create(rt.getUser(), UUID.randomUUID().toString(),request.getHeader("User-Agent"));
+
+       setRefreshCookie(response,newRefreshToken.getToken());
+
+       refreshTokenService.delete(rt);
+
+       return new JwtResponse(newAccessToken);
 
     }
 
@@ -156,7 +179,7 @@ public class AuthService {
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setPath("/auth/refresh");
-        cookie.setMaxAge(3* 60);
+        cookie.setMaxAge(15* 60);
         response.addCookie(cookie);
     }
 
