@@ -1,16 +1,19 @@
 package org.bookstore.bookstore.services;
 
 import lombok.AllArgsConstructor;
+import org.bookstore.bookstore.dtos.CartDto;
 import org.bookstore.bookstore.entities.Book;
 import org.bookstore.bookstore.entities.Cart;
 import org.bookstore.bookstore.entities.CartItem;
 import org.bookstore.bookstore.entities.User;
 import org.bookstore.bookstore.exceptions.BusinessException;
+import org.bookstore.bookstore.mappers.CartMapper;
 import org.bookstore.bookstore.repositories.CartItemRepository;
 import org.bookstore.bookstore.repositories.CartRepository;
 import org.bookstore.bookstore.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -20,7 +23,7 @@ public class CartService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final CartItemRepository cartItemRepository;
-
+    private final CartMapper cartMapper;
 
     public Cart AddToCart(Integer userId, Long bookId, int quantity) {
         Cart cart = cartRepository.findByUserId(userId)
@@ -50,4 +53,42 @@ public class CartService {
 
         return cartRepository.save(cart);
     }
+
+    public CartDto getCartDetails(Integer userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        // Convert to DTO to calculate totals dynamically
+        return cartMapper.toDto(cart);
+    }
+
+
+    public void removeItem(Integer userId, Long cartItemId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        // Remove functionality relying on orphanRemoval=true in Entity
+        cart.getItems().removeIf(item -> item.getId().equals(cartItemId));
+        cartRepository.save(cart);
+    }
+
+    public void clearCart(Integer userId) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException("Cart not found for user"));
+        cart.getItems().clear();
+        cartRepository.save(cart);
+    }
+
+
+
+    private Cart createCartForUser(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found"));
+
+        Cart cart = new Cart();
+        cart.setUser(user);
+        return cartRepository.save(cart);
+    }
+
+
 }

@@ -12,8 +12,7 @@ public interface CartRepository extends JpaRepository<Cart,Long> {
     Optional<Cart> findById(Long id);
 
 
-    @Query("INSERT INTO Cart (user_id) VALUES (?1)")
-    void createCartForUser(Integer userId);
+
 
 }
 
