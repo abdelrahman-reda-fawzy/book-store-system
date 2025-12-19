@@ -11,7 +11,7 @@ public interface BillingInfoRepository
 
     @Query("""
         SELECT b FROM BillingInfo b
-        WHERE b.user.userID = :userId
+        WHERE b.user.userId = :userId
           AND b.cardNumber = :card
           AND b.expirationDate >= CURRENT_DATE
     """)

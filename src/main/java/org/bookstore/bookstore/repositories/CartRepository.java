@@ -9,10 +9,9 @@ import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart,Long> {
 
-    // 1. Rename method to findByUserId to avoid conflict with standard findById
-    // 2. Use exact DB table name 'Carts' and column 'UserId' (case-sensitive in some DBs)
-    @Query(value = "SELECT * FROM Carts c WHERE c.UserId = :userId", nativeQuery = true)
-    Optional<Cart> findByUserId(@Param("userId") Integer userId);
+
+//  @Query(value = "SELECT * FROM Carts c WHERE c.user_id = :userId", nativeQuery = true)
+    Optional<Cart> findByUser_UserId(@Param("userId") Integer userId);
 
 
 
