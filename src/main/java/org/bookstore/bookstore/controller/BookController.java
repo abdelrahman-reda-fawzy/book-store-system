@@ -17,6 +17,12 @@ public class BookController {
         this.bookService = bookService;
     }
 
+    // GET ALL BOOKS
+    @GetMapping("/all")
+    public List<Book> getAllBooks() {
+        return bookService.getAllBooks();
+    }
+
     // ADD A NEW BOOK
     @PostMapping("/add")
     public void addBook(@RequestBody Book book) {

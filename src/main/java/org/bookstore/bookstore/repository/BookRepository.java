@@ -15,6 +15,10 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface BookRepository extends JpaRepository<Book, Integer> {
+    // GET ALL BOOKS
+    @Query(value = "SELECT * FROM Books", nativeQuery = true)
+    List<Book> getAllBooks();
+
     // ADD NEW BOOK (Admin)
     @Modifying
     @Query(value = """
