@@ -25,7 +25,7 @@ public class CartController {
             @RequestParam int bookId,
             @RequestParam int quantity
     ) {
-        cartService.AddToCart(userId, bookId, quantity);
+        cartService.addToCart( userId, bookId, quantity);
         return ResponseEntity.ok().build();
     }
 
@@ -36,5 +36,22 @@ public class CartController {
     ) {
         cartService.removeItem(userId, (long) bookId);
         return ResponseEntity.ok("Item removed");
+    }
+
+    @PostMapping("/{userId}/decrement")
+    public ResponseEntity<String> decrementCart(
+            @PathVariable Integer userId,
+            @RequestParam int bookId
+    ) {
+        cartService.decrementQuantity(userId, (long) bookId);
+        return ResponseEntity.ok("Quantity decremented");
+    }
+
+    @DeleteMapping("{userId}/clear")
+    public ResponseEntity<String> clearCart(
+            @PathVariable Integer userId
+    ) {
+        cartService.clearCart(userId);
+        return ResponseEntity.ok("Cart Cleared");
     }
 }

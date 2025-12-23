@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Table(name = "CartItems")
 @Entity
 @AllArgsConstructor
@@ -13,23 +15,25 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CartItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+    @EmbeddedId
+    private CartItemKey id;
 
     @ManyToOne
+    @MapsId("cartId")
     @JoinColumn(name = "cart_id")
     private Cart cart;
 
     @ManyToOne
+    @MapsId("bookId")
     @JoinColumn(name = "book_id")
     private Book book;
 
     private int quantity;
 
-    public Double getSubTotal() {
+    public BigDecimal getSubTotal() {
         double price = book.getSellingPrice().doubleValue();
-        return price * quantity;
+        return BigDecimal.valueOf(price).multiply(BigDecimal.valueOf(quantity));
     }
 
 }

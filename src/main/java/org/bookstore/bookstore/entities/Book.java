@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
-@Table(name = "books")
+@Table(name = "Books")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
