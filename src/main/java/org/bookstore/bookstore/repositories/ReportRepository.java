@@ -1,4 +1,4 @@
-package org.bookstore.bookstore.repository;
+package org.bookstore.bookstore.repositories;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

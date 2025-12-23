@@ -1,6 +1,6 @@
 package org.bookstore.bookstore.services;
 
-import org.bookstore.bookstore.repository.ReportRepository;
+import org.bookstore.bookstore.repositories.ReportRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

@@ -1,7 +1,7 @@
 package org.bookstore.bookstore.services;
 
 import org.bookstore.bookstore.entities.PublisherOrder;
-import org.bookstore.bookstore.repository.PublisherOrderRepository;
+import org.bookstore.bookstore.repositories.PublisherOrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

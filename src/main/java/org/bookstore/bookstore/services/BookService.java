@@ -1,7 +1,7 @@
 package org.bookstore.bookstore.services;
 
 import org.bookstore.bookstore.entities.Book;
-import org.bookstore.bookstore.repository.BookRepository;
+import org.bookstore.bookstore.repositories.BookRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
