@@ -2,11 +2,14 @@ package org.bookstore.bookstore.services;
 
 
 import lombok.AllArgsConstructor;
+import org.bookstore.bookstore.dtos.*;
 import org.bookstore.bookstore.entities.User;
 import org.bookstore.bookstore.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -17,10 +20,114 @@ public class UserService {
     {
       return  userRepository.findByEmail(email);
     }
+
+    public Optional<User> findById(Integer id) { return  userRepository.findById(id);}
+
     public void save(User user)
     {
         userRepository.save(user);
     }
+
+    public List<User> getAllUsers(){
+        return  userRepository.getAll();
+    }
+
+
+    public void deleteById( Integer id)
+    {
+        userRepository.deleteById(id);
+    }
+
+    public void  updateUser(User user){
+
+        userRepository.update(user.getUserId(),user.getUsername(),user.getPhone(),user.getPassword());
+    }
+    public CartResponse getCartWithItems(Long userId, Long cartId) {
+
+        List<Object[]> rows =
+                userRepository.findCartItemsWithTotal(userId, cartId);
+
+        // Empty cart
+        if (rows.isEmpty()) {
+            return new CartResponse(cartId, BigDecimal.ZERO, List.of());
+        }
+
+        // Cart-level data (same in all rows)
+        BigDecimal cartTotal = (BigDecimal) rows.get(0)[7];
+
+        List<CartItemDto> items = new ArrayList<>();
+
+        for (Object[] row : rows) {
+
+            Long bookId = ((Number) row[2]).longValue();
+            String title = (String) row[3];
+            BigDecimal price = (BigDecimal) row[5];
+            int quantity = ((Number) row[6]).intValue();
+
+            BigDecimal subTotal =
+                    price.multiply(BigDecimal.valueOf(quantity));
+
+            items.add(
+                    new CartItemDto(
+                            bookId,
+                            title,
+                            quantity,
+                            subTotal,
+                            price
+                    )
+            );
+        }
+
+        return new CartResponse(cartId, cartTotal, items);
+    }
+
+        public OrderHistoryResponse getOrderHistory(Long userId) {
+
+            List<Object[]> rows =
+                    userRepository.findOrderHistoryByUserId(userId);
+
+            if (rows.isEmpty()) {
+                return new OrderHistoryResponse(userId, null, List.of());
+            }
+
+            String username = (String) rows.get(0)[1];
+
+            Map<Long, OrderDto> ordersMap = new LinkedHashMap<>();
+
+            for (Object[] row : rows) {
+
+                Long orderId = ((Number) row[2]).longValue();
+
+                OrderDto order = ordersMap.computeIfAbsent(
+                        orderId,
+                        id -> new OrderDto(
+                                id,
+                                ((Timestamp) row[3]).toLocalDateTime(),
+                                (BigDecimal) row[4],
+                                new ArrayList<>()
+                        )
+                );
+
+                order.getBooks().add(
+                        new BookDto(
+                                (String) row[5],  // ISBN
+                                (String) row[6]   // title
+                        )
+                );
+            }
+
+            return new OrderHistoryResponse(
+                    userId,
+                    username,
+                    new ArrayList<>(ordersMap.values())
+            );
+        }
+
+
+
+
+
+
 
 
 

@@ -44,14 +44,90 @@ public interface UserRepository  extends JpaRepository<User,Integer> {
 
 
     @Query(
-            value = " UPDATE Users SET Username=: Username , Phone=:Phone , Role=:Role WHERE UserId=userId",
+            value = " UPDATE Users SET Username=: Username , Phone=:Phone , Role=:Role, Password=:password WHERE UserId=userId",
             nativeQuery = true
     )
-    Optional<User> update(@Param("userId") Integer userId,String Username,String Phone);
+    Optional<User> update(@Param("userId") Integer userId,String Username,String Phone,String password);
 
     @Query(
             value = " UPDATE Users SET Password=: Password  WHERE UserId=userId",
             nativeQuery = true
     )
     Optional<User> changePassword(@Param("userId") Integer userId , String Password );
+
+
+    @Query(
+            value = "SELECT  *\n" +
+                    "FROM  Users U LEFT JOIN\n" +
+                    "    Carts C\n" +
+                    "ON C.user_id= U.UserID\n" +
+                    "LEFT JOIN CartItems it\n" +
+                    "ON it.cart_id=C.cart_id\n" +
+                    "Left join Books B\n" +
+                    "ON it.book_id=B.BookId\n" +
+                    "WHERE U.UserID=:id",
+            nativeQuery = true
+    )
+    List<Object[]> findCartItemsByCartId(@Param("userId") Integer userId);
+
+
+
+    @Query(
+            value = """
+            SELECT
+                U.UserID        AS userID,
+                C.cart_id       AS cartId,
+                B.BookID          AS bookId,
+                B.Title         AS title,
+                B.Category      AS category,
+                B.SellingPrice  AS sellingPrice,
+                it.quantity     AS quantity,
+                COALESCE(
+                    SUM(B.SellingPrice * it.quantity)
+                        OVER (PARTITION BY C.cart_id),
+                    0
+                ) AS cartTotal
+            FROM Users U
+            LEFT JOIN Carts C
+                   ON C.user_id = U.UserID
+            LEFT JOIN CartItems it
+                   ON it.cart_id = C.cart_id
+            LEFT JOIN Books B
+                   ON it.book_id = B.BookId
+            WHERE U.UserID = :id
+              AND C.cart_id = :cartId
+            """,
+            nativeQuery = true
+    )
+    List<Object[]> findCartItemsWithTotal(
+            @Param("id") Long userId,
+            @Param("cartId") Long cartId
+    );
+
+
+
+    @Query(
+            value = """
+            SELECT
+                U.UserID              AS userID,
+                U.Username            AS username,
+                co.CustomerOrderID    AS customerOrderID,
+                co.OrderDate          AS orderDate,
+                co.TotalPrice         AS totalPrice,
+                book.BookID             AS BookID,
+                book.Title            AS title
+            FROM Users U
+            LEFT JOIN CustomerOrders co
+                   ON co.UserID = U.UserID
+            LEFT JOIN CustomerOrderItems citem
+                   ON citem.CustomerOrderID = co.CustomerOrderID
+            LEFT JOIN Books book
+                   ON citem.BookID = book.BookID
+            WHERE U.UserID = :userId
+            """,
+            nativeQuery = true
+    )
+    List<Object []> findOrderHistoryByUserId(
+            @Param("userId") Long userId
+    );
 }
