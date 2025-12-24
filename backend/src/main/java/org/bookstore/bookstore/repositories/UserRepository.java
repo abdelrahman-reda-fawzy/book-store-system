@@ -1,5 +1,6 @@
 package org.bookstore.bookstore.repositories;
 
+import org.bookstore.bookstore.Interfaces.CartItemRow;
 import org.bookstore.bookstore.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -49,6 +50,7 @@ public interface UserRepository  extends JpaRepository<User,Integer> {
     )
     Optional<User> update(@Param("userId") Integer userId,String Username,String Phone,String password);
 
+
     @Query(
             value = " UPDATE Users SET Password=: Password  WHERE UserId=userId",
             nativeQuery = true
@@ -57,18 +59,23 @@ public interface UserRepository  extends JpaRepository<User,Integer> {
 
 
     @Query(
-            value = "SELECT  *\n" +
-                    "FROM  Users U LEFT JOIN\n" +
-                    "    Carts C\n" +
-                    "ON C.user_id= U.UserID\n" +
-                    "LEFT JOIN CartItems it\n" +
-                    "ON it.cart_id=C.cart_id\n" +
-                    "Left join Books B\n" +
-                    "ON it.book_id=B.BookId\n" +
-                    "WHERE U.UserID=:id",
+            value = """
+        SELECT
+            C.cart_id       AS cartId,
+            B.BookId        AS bookId,
+            B.Title         AS title,
+            B.SellingPrice  AS sellingPrice,
+            it.quantity     AS quantity
+        FROM Carts C
+        JOIN CartItems it ON it.cart_id = C.cart_id
+        JOIN Books B ON it.book_id = B.BookId
+        WHERE C.user_id = :userId
+        """,
             nativeQuery = true
     )
-    List<Object[]> findCartItemsByCartId(@Param("userId") Integer userId);
+    List<CartItemRow> findCartItemsByCartId(
+            @Param("userId") Integer userId
+    );
 
 
 
@@ -76,7 +83,7 @@ public interface UserRepository  extends JpaRepository<User,Integer> {
             value = """
             SELECT
                 U.UserID        AS userID,
-                C.cart_id       AS cartId,
+                C.cart_id       AS cart_Id,
                 B.BookID          AS bookId,
                 B.Title         AS title,
                 B.Category      AS category,
@@ -114,7 +121,7 @@ public interface UserRepository  extends JpaRepository<User,Integer> {
                 co.CustomerOrderID    AS customerOrderID,
                 co.OrderDate          AS orderDate,
                 co.TotalPrice         AS totalPrice,
-                book.BookID             AS BookID,
+                book.ISBN       AS isbn,
                 book.Title            AS title
             FROM Users U
             LEFT JOIN CustomerOrders co

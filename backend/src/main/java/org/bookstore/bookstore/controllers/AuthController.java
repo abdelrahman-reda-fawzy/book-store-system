@@ -2,6 +2,7 @@ package org.bookstore.bookstore.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.bookstore.bookstore.dtos.*;
@@ -9,6 +10,8 @@ import org.bookstore.bookstore.dtos.auth.*;
 import org.bookstore.bookstore.services.Authintication.AuthService;
 import org.bookstore.bookstore.services.Authintication.JwtService;
 import org.bookstore.bookstore.services.Authintication.RefreshTokenService;
+import org.bookstore.bookstore.services.CartService;
+import org.bookstore.bookstore.services.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,8 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 //class
     private final AuthService authService;
-    private final JwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
+    private final CartService cartService;
 
     @GetMapping("/me")
     public ResponseEntity<?> me() {
@@ -77,12 +79,14 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Transactional
     public ResponseEntity<?> logOut(@RequestBody LogOutRequest logOutRequest)
     {
         if(logOutRequest.getUserId()==null)
         {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("enter the id of the user");
         }
+        cartService.clearCart(logOutRequest.getUserId());
         authService.logoutAllDevices(logOutRequest.getUserId());
         return  ResponseEntity.ok().body("logged out succefully");
 

@@ -40,10 +40,13 @@ public class SecurityConfig {
 
                         // Admin endpoints
                         .requestMatchers("/auth/admin/**").hasRole("ADMIN")
-
+                        .requestMatchers("/books/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/publisherOrders/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/reports/admin/**").hasRole("ADMIN")
 
                         // Authenticated users
                         .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(
                         jwtAuthFilter,

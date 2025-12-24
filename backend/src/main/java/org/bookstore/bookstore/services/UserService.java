@@ -2,6 +2,7 @@ package org.bookstore.bookstore.services;
 
 
 import lombok.AllArgsConstructor;
+import org.bookstore.bookstore.Interfaces.CartItemRow;
 import org.bookstore.bookstore.dtos.*;
 import org.bookstore.bookstore.entities.User;
 import org.bookstore.bookstore.repositories.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -40,7 +42,7 @@ public class UserService {
 
     public void  updateUser(User user){
 
-        userRepository.update(user.getUserId(),user.getUsername(),user.getPhone(),user.getPassword());
+        userRepository.save(user);
     }
     public CartResponse getCartWithItems(Long userId, Long cartId) {
 
@@ -102,7 +104,7 @@ public class UserService {
                         orderId,
                         id -> new OrderDto(
                                 id,
-                                ((Timestamp) row[3]).toLocalDateTime(),
+                                (LocalDateTime) row[3],
                                 (BigDecimal) row[4],
                                 new ArrayList<>()
                         )
@@ -125,7 +127,43 @@ public class UserService {
 
 
 
+    public List<CartResponse> getUserCarts(Integer userId) {
 
+        List<CartItemRow> rows =
+                userRepository.findCartItemsByCartId(userId);
+
+        Map<Long, CartResponse> cartMap = new LinkedHashMap<>();
+
+        for (CartItemRow row : rows) {
+
+            BigDecimal price = row.getSellingPrice();
+            int quantity = row.getQuantity();
+
+            BigDecimal subTotal =
+                    price.multiply(BigDecimal.valueOf(quantity));
+
+            CartResponse cart = cartMap.computeIfAbsent(
+                    row.getCartId(),
+                    id -> new CartResponse(id, BigDecimal.ZERO, new ArrayList<>())
+            );
+
+            cart.getItems().add(
+                    new CartItemDto(
+                            row.getBookId(),
+                            row.getTitle(),
+                            quantity,
+                            subTotal,
+                            price
+                    )
+            );
+
+            cart.setCartTotal(
+                    cart.getCartTotal().add(subTotal)
+            );
+        }
+
+        return new ArrayList<>(cartMap.values());
+    }
 
 
 
