@@ -3,6 +3,7 @@ package org.bookstore.bookstore.services;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.bookstore.bookstore.dtos.CartDto;
+import org.bookstore.bookstore.dtos.CartItemDto;
 import org.bookstore.bookstore.dtos.CheckoutRequest;
 import org.bookstore.bookstore.entities.*;
 import org.bookstore.bookstore.exceptions.BusinessException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -27,6 +29,7 @@ public class CartService {
     private final PaymentService paymentService;
     private final CustomerOrderRepository  customerOrderRepository;
     private final CustomerOrderItemRepository customerOrderItemRepository;
+    private final BookService bookService;
 
     public void addToCart(Integer userId, int bookId, int quantity) {
 
@@ -87,12 +90,17 @@ public class CartService {
 
         int cartId = cart.getId();
 
+        List<CartItem> before= cart.getItems();
+
+        System.out.println("am hereee ");
         CartDto cartDto = cartMapper.toDto(cart);
         BigDecimal totalPrice = cartDto.getTotalPrice();
 
         if (totalPrice == null || totalPrice.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessException("Cart is empty");
         }
+
+        //create and insert order
 
         customerOrderRepository.insertCustomerOrder(
                 userId,
@@ -104,6 +112,23 @@ public class CartService {
         Integer orderId = customerOrderRepository.getLastInsertedOrderId();
 
         customerOrderItemRepository.insertOrderItemsFromCart(orderId, cartId);
+
+
+        for(var item : before)
+        {
+            var book=item.getBook();
+
+            if(book.getNumberOfBooks() < item.getQuantity())
+            {
+                throw new BusinessException("number of book is not sufficient");
+            }
+
+            bookService.updateBookStock(book.getBookID(),book.getNumberOfBooks()-item.getQuantity());
+        }
+
+
+
+
 
         cartItemRepository.clearCart(cartId);
     }
