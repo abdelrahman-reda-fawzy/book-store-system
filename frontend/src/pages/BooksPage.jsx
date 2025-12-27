@@ -11,11 +11,28 @@ const BooksPage = ({ isAdmin }) => {
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
+  const [bookCovers, setBookCovers] = useState({});
+
   const userId = JSON.parse(localStorage.getItem('user'))?.userId || 1;
 
   useEffect(() => {
     loadAllBooks();
   }, []);
+
+  // 🔹 Fetch covers whenever books change (works for search too)
+  useEffect(() => {
+    books.forEach(async (book) => {
+      if (!book.isbn || bookCovers[book.bookID]) return;
+
+      const coverUrl = await getBookCover(book.isbn);
+      if (coverUrl) {
+        setBookCovers((prev) => ({
+          ...prev,
+          [book.bookID]: coverUrl,
+        }));
+      }
+    });
+  }, [books]);
 
   const loadAllBooks = async () => {
     setLoading(true);
@@ -39,7 +56,9 @@ const BooksPage = ({ isAdmin }) => {
 
     setLoading(true);
     try {
-      const data = await apiCall(`/books/search/${searchType}/${encodeURIComponent(searchTerm)}`);
+      const data = await apiCall(
+        `/books/search/${searchType}/${encodeURIComponent(searchTerm)}`
+      );
       setBooks(Array.isArray(data) ? data : [data]);
     } catch (error) {
       console.error('Search failed:', error);
@@ -52,10 +71,10 @@ const BooksPage = ({ isAdmin }) => {
 
   const handleAddToCart = async (bookId) => {
     try {
-      await apiCall(`/cart/${userId}/add?bookId=${bookId}&quantity=1`, { 
-        method: 'POST' 
+      await apiCall(`/cart/${userId}/add?bookId=${bookId}&quantity=1`, {
+        method: 'POST',
       });
-      alert('Added to cart!'); 
+      alert('Added to cart!');
     } catch (error) {
       alert(error.message || 'Failed to add to cart');
     }
@@ -81,13 +100,29 @@ const BooksPage = ({ isAdmin }) => {
     }
 
     try {
-      await apiCall(`/publisherOrders/admin/place/${bookId}/${parseInt(quantity)}`, { 
-        method: 'POST' 
-      });
+      await apiCall(
+        `/publisherOrders/admin/place/${bookId}/${parseInt(quantity)}`,
+        { method: 'POST' }
+      );
       alert('Publisher order placed successfully!');
       loadAllBooks();
     } catch (error) {
       alert('Failed to place publisher order: ' + error.message);
+    }
+  };
+
+  // 🔹 Book cover API
+  const getBookCover = async (isbn) => {
+    try {
+      const res = await fetch(
+        `https://bookcover.longitood.com/bookcover/${isbn}`
+      );
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      return data.url || null;
+    } catch {
+      return null;
     }
   };
 
@@ -108,7 +143,7 @@ const BooksPage = ({ isAdmin }) => {
             </button>
           )}
         </div>
-        
+
         <div className="flex gap-4">
           <select
             value={searchType}
@@ -148,13 +183,35 @@ const BooksPage = ({ isAdmin }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {books.map((book) => (
-            <div key={book.bookID} className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
+            <div
+              key={book.bookID}
+              className="bg-white rounded-lg shadow hover:shadow-lg transition p-6"
+            >
+              {/* 📘 BOOK COVER */}
+              <div className="mb-4 flex justify-center">
+                <img
+                  src={
+                    bookCovers[book.bookID] ||
+                    'https://via.placeholder.com/150x220?text=No+Cover'
+                  }
+                  alt={book.title}
+                  className="h-56 w-auto object-contain rounded"
+                  loading="lazy"
+                />
+              </div>
+
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-800 mb-2">{book.title}</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  {book.title}
+                </h3>
                 <p className="text-sm text-gray-600">ISBN: {book.isbn}</p>
-                <p className="text-sm text-gray-600">Category: {book.category}</p>
+                <p className="text-sm text-gray-600">
+                  Category: {book.category}
+                </p>
                 {book.publicationYear && (
-                  <p className="text-sm text-gray-600">Year: {book.publicationYear}</p>
+                  <p className="text-sm text-gray-600">
+                    Year: {book.publicationYear}
+                  </p>
                 )}
               </div>
 
@@ -162,7 +219,13 @@ const BooksPage = ({ isAdmin }) => {
                 <span className="text-2xl font-bold text-indigo-600">
                   ${book.sellingPrice?.toFixed(2) || '0.00'}
                 </span>
-                <span className={`text-sm font-semibold ${book.numberOfBooks > 10 ? 'text-green-600' : 'text-orange-600'}`}>
+                <span
+                  className={`text-sm font-semibold ${
+                    book.numberOfBooks > 10
+                      ? 'text-green-600'
+                      : 'text-orange-600'
+                  }`}
+                >
                   Stock: {book.numberOfBooks || 0}
                 </span>
               </div>
@@ -172,7 +235,6 @@ const BooksPage = ({ isAdmin }) => {
                   <button
                     onClick={() => setEditingBook(book)}
                     className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-1"
-                    title="Edit Book"
                   >
                     <Edit className="w-4 h-4" />
                     <span className="text-xs">Edit</span>
@@ -180,7 +242,6 @@ const BooksPage = ({ isAdmin }) => {
                   <button
                     onClick={() => placePublisherOrder(book.bookID)}
                     className="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1"
-                    title="Order from Publisher"
                   >
                     <Package className="w-4 h-4" />
                     <span className="text-xs">Order</span>
@@ -188,7 +249,6 @@ const BooksPage = ({ isAdmin }) => {
                   <button
                     onClick={() => handleDeleteBook(book.bookID)}
                     className="bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-1"
-                    title="Delete Book"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span className="text-xs">Delete</span>
