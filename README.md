@@ -3,12 +3,12 @@
 
 ## 👥 Team Members
 
-| Name | ID | Role |
-| :--- | :--- | :--- |
-| **Mohamed Atef** | 8660 | Customer Management & Security |
-| **Eyad Mohamed** | 8744 | Frontend Development |
-| **Abdelrahman Reda** | 8716 | Backend: Books Management & Publisher Orders |
-| **Omar Adel** | 8746 | Backend: Cart & Customer Order Management |
+| Name | Role |
+| :--- | :--- |
+| **Mohamed Atef** | Customer Management & Security |
+| **Eyad Mohamed** | Frontend Development |
+| **Abdelrahman Reda** | Backend: Books Management, Publisher Orders, Sales Analytics |
+| **Omar Adel** | Backend: Cart & Customer Order Management |
 
 ---
 
