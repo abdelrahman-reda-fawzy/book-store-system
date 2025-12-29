@@ -33,63 +33,63 @@ The system implements a secure authentication layer. Access is strictly role-bas
 
 *Figure 1: User Login Interface*
 
-![Register Screen](Screenshot%20from%202025-12-27%2003-57-10.png)
+<img width="820" height="812" alt="Screenshot from 2025-12-27 03-57-10" src="https://github.com/user-attachments/assets/38565c87-0b92-454a-9d8b-bd5f8bad8ce2" />
+
 *Figure 2: Customer Registration Form*
 
-![Database Verification](Screenshot%20from%202025-12-27%2004-00-37.png)
+<img width="1350" height="74" alt="Screenshot from 2025-12-27 04-00-37" src="https://github.com/user-attachments/assets/de2e8d51-9916-4557-aa8f-a2928fd8557b" />
+
 *Figure 3: Database Verification - Customer Record Insertion*
 
 ---
 
 ### 2. Customer Profile Management
-**Developer:** Mohamed Atef
 
 Users have full CRUD (Create, Read, Update, Delete) capabilities over their personal data, excluding their unique Username.
 
-![Profile Overview](Screenshot%20from%202025-12-27%2004-38-03.png)
+<img width="1259" height="698" alt="Screenshot from 2025-12-27 04-38-03" src="https://github.com/user-attachments/assets/c75b0ab3-aefa-48e4-9a36-f1119dc4e2d2" />
+
 *Figure 4: User Profile Overview*
 
-![Edit Profile](Screenshot%20from%202025-12-27%2004-38-20.png)
+<img width="1259" height="698" alt="Screenshot from 2025-12-27 04-38-20" src="https://github.com/user-attachments/assets/fdfca8e2-9658-4099-ac32-28860986b2b4" />
+
 *Figure 5: Edit Profile Interface*
 
 ---
 
 ### 3. Book Search and Dynamic Browsing
-**Developer:** Eyad Mohamed
 
 The frontend provides a responsive interface for querying the database.
 * **Query Construction:** Inputs are sanitized and converted into SQL `LIKE` queries (e.g., `SELECT * FROM Books WHERE Title LIKE '%query%'`).
 * **Real-time Availability:** The interface binds directly to the `Stock_Quantity` column. If stock is 0, the "Add to Cart" button is disabled via frontend logic.
 
-![Search Interface](Screenshot%20from%202025-12-27%2004-36-47.png)
+<img width="1259" height="754" alt="Screenshot from 2025-12-27 04-36-47" src="https://github.com/user-attachments/assets/8818315b-c945-4f9d-90c8-53873bb73b59" />
 *Figure 6: Book Search and Browsing Interface*
 
 ---
 
 ### 4. Shopping Cart & Order Management
-**Developer:** Omar Adel
 
 The shopping cart module manages the temporary state of selected items before the final transaction.
 * **Transaction Atomicity (ACID):** The checkout process is wrapped in a database transaction. It simultaneously inserts into `Sales` and updates `Books` (`SET Stock = Stock - Qty`).
 * **Constraint Enforcement:** A database `CHECK` constraint ensures `Stock_Quantity >= 0`. If a purchase exceeds available stock, the transaction rolls back.
 
-![Shopping Cart](Screenshot%20from%202025-12-27%2004-37-14.png)
+<img width="1259" height="754" alt="Screenshot from 2025-12-27 04-37-14" src="https://github.com/user-attachments/assets/06f64180-815b-4802-981d-731c11878051" />
 *Figure 7: Shopping Cart with Dynamic Total Calculation*
 
-![Checkout](Screenshot%20from%202025-12-27%2004-37-42.png)
+<img width="1259" height="897" alt="Screenshot from 2025-12-27 04-37-42" src="https://github.com/user-attachments/assets/6742e571-545c-49bd-8396-6ae59e6bd5ba" />
 *Figure 8: Checkout Payment Interface*
 
 ---
 
 ### 5. Order History Analysis
-**Developer:** Omar Adel
 
 This view performs a `JOIN` operation between the `Sales`, `Books`, and `Customer` tables to reconstruct the historical data of specific transactions.
 
-![Order History List](Screenshot%20from%202025-12-27%2004-39-03.png)
+<img width="1259" height="698" alt="Screenshot from 2025-12-27 04-39-03" src="https://github.com/user-attachments/assets/b273d665-1328-4242-bcc2-117b9125bb16" />
 *Figure 9: Customer Order History Summary*
 
-![Order Details](Screenshot%20from%202025-12-27%2004-37-52.png)
+<img width="1259" height="676" alt="Screenshot from 2025-12-27 04-37-52" src="https://github.com/user-attachments/assets/e33f81df-1ac2-44d0-82c0-6280c4d53172" />
 *Figure 10: Detailed View of a Specific Order*
 
 ---
@@ -99,22 +99,24 @@ This view performs a `JOIN` operation between the `Sales`, `Books`, and `Custome
 
 The admin dashboard provides high-level control over the bookstore's inventory, allowing filtering by Title, Author, or Category.
 
-![Admin Category Filter](Screenshot%20from%202025-12-27%2004-07-30.png)
+<img width="1260" height="930" alt="Screenshot from 2025-12-27 04-07-30" src="https://github.com/user-attachments/assets/f796e1aa-af33-42f8-bff2-1cd326f180de" />
+
 *Figure 11: Admin Dashboard - Filtering by Category*
 
-![Admin Author Search](Screenshot%20from%202025-12-27%2004-18-53.png)
+<img width="1263" height="781" alt="Screenshot from 2025-12-27 04-18-53" src="https://github.com/user-attachments/assets/64a91f48-5a50-425d-920e-a5f8e2a8b13e" />
+
 *Figure 12: Admin Dashboard - Searching by Author*
 
-![Add Book](Screenshot%20from%202025-12-27%2004-29-06.jpg)
+<img width="1263" height="781" alt="Screenshot from 2025-12-27 04-29-06" src="https://github.com/user-attachments/assets/d5f4392b-58aa-4bb1-8a4c-a3e3479c552e" />
+
 *Figure 13: Interface for Adding New Books*
 
-![DB Books Table](Screenshot%20from%202025-12-27%2004-30-11.png)
+<img width="1555" height="303" alt="Screenshot from 2025-12-27 04-30-11" src="https://github.com/user-attachments/assets/5659ec5f-81d5-4a1d-9eca-016dfcb5d389" />
 *Figure 14: Database Verification - Books Table Population*
 
 ---
 
 ### 7. Automated Re-ordering (Trigger Implementation)
-**Developer:** Abdelrahman Reda
 
 This feature demonstrates the advanced use of **Database Triggers** to automate inventory maintenance.
 * **Trigger Mechanism:** An `AFTER UPDATE` trigger on the `Books` table.
@@ -122,8 +124,25 @@ This feature demonstrates the advanced use of **Database Triggers** to automate 
 * **Action:** Automatically inserts a row into `Publisher_Orders`.
 * **Completion:** Admin confirmation updates the status and replenishes stock.
 
-![Pending Orders](Screenshot%20from%202025-12-27%2004-33-45.png)
+<img width="628" height="696" alt="Screenshot from 2025-12-27 04-33-45" src="https://github.com/user-attachments/assets/9da805f7-1d93-4cdb-bf62-909bf3f668b5" />
 *Figure 15: Pending Publisher Orders (Automatically Generated by Trigger)*
 
-![Completed Orders](Screenshot%20from%202025-12-27%2004-34-01.png)
+<img width="1248" height="407" alt="Screenshot from 2025-12-27 04-34-01" src="https://github.com/user-attachments/assets/d11b8e66-9335-484b-9636-2cacd6638c7e" />
 *Figure 16: Completed Publisher Orders*
+
+
+### 8. Admin Dashboard & Statistics
+
+The system includes a comprehensive analytics dashboard that aggregates sales data to provide actionable insights for administrators. This module utilizes complex SQL aggregation queries (`SUM`, `COUNT`, `GROUP BY`) to generate real-time reports.
+
+**Key Analytical Features:**
+* **Total Sales Reports:** Calculates revenue for the previous month and allows specific date querying.
+* **Top Customers:** Identifies the top 5 customers based on total purchase volume over the last 3 months.
+* **Best-Selling Books:** Ranks the top 10 books by number of copies sold.
+
+<img width="1259" height="604" alt="Screenshot from 2025-12-27 04-42-18" src="https://github.com/user-attachments/assets/9b2529c7-5c97-46ac-ab53-5f21cd90fc70" />
+*Figure 17: Top sales and top customers in specific period of time*
+
+<img width="1259" height="474" alt="Screenshot from 2025-12-27 04-42-10" src="https://github.com/user-attachments/assets/002989b5-b103-43c0-a2c1-c8e33bee3283" />
+
+*Figure 18: Best Selling Books*
