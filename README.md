@@ -29,8 +29,8 @@ The system implements a secure authentication layer. Access is strictly role-bas
 * **Security:** Passwords are hashed before storage.
 * **Session Management:** Generates session tokens persisting user ID and Role.
 
-![Login Screen](<img width="502" height="670" alt="Screenshot from 2025-12-27 04-18-28" src="https://github.com/user-attachments/assets/3f743583-be02-4280-a433-7363571df74f" />
-)
+<img width="502" height="670" alt="Screenshot from 2025-12-27 04-18-28" src="https://github.com/user-attachments/assets/13a60e3b-f165-4fa6-a897-e32b3424f338" />
+
 *Figure 1: User Login Interface*
 
 ![Register Screen](Screenshot%20from%202025-12-27%2003-57-10.png)
